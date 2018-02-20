@@ -42,12 +42,12 @@ def get_data(data_dir, hdf5):
         from tflearn.data_utils import build_hdf5_image_dataset
         
         print ' Creating hdf5 train dataset.'
-        build_hdf5_image_dataset(train_file, image_shape=(227, 227), mode='file', output_path='hdf5/tiny-imagenet_train.h5', categorical_labels=True, normalize=True)
+        build_hdf5_image_dataset(train_file, image_shape=(224, 224), mode='file', output_path='hdf5/tiny-imagenet_train.h5', categorical_labels=True, normalize=True)
 
         # if not os.path.exists('hdf5/tiny-imagenet_val.h5'):
         from tflearn.data_utils import build_hdf5_image_dataset
         print ' Creating hdf5 val dataset.'
-        build_hdf5_image_dataset(val_file, image_shape=(227, 227), mode='file', output_path='hdf5/tiny-imagenet_val.h5', categorical_labels=True, normalize=True)
+        build_hdf5_image_dataset(val_file, image_shape=(224, 224), mode='file', output_path='hdf5/tiny-imagenet_val.h5', categorical_labels=True, normalize=True)
 
         # Load training data from hdf5 dataset.
         h5f = h5py.File('hdf5/tiny-imagenet_train.h5', 'r')
@@ -62,8 +62,8 @@ def get_data(data_dir, hdf5):
     # Load images directly from disk when they are required.
     else:
         from tflearn.data_utils import image_preloader
-        X, Y = image_preloader(train_file, image_shape=(64, 64), mode='file', categorical_labels=True, normalize=True, filter_channel=True)
-        X_test, Y_test = image_preloader(val_file, image_shape=(64, 64), mode='file', categorical_labels=True, normalize=True, filter_channel=True)
+        X, Y = image_preloader(train_file, image_shape=(224, 224), mode='file', categorical_labels=True, normalize=True, filter_channel=True)
+        X_test, Y_test = image_preloader(val_file, image_shape=(224, 224), mode='file', categorical_labels=True, normalize=True, filter_channel=True)
 
     # Randomly shuffle the dataset.
     X, Y = shuffle(X, Y)
@@ -80,7 +80,7 @@ def main(data_dir, hdf5, name):
         name: Name of the current training run."""
 
     # Set some variables for training.
-    batch_size = 256
+    batch_size = 32
     num_epochs = 50
     learning_rate = 0.001
 
@@ -97,16 +97,17 @@ def main(data_dir, hdf5, name):
     img_aug.add_random_flip_leftright()
 
     # Get the network definition.
-    network = create_alex_network(img_prep, img_aug, learning_rate)
+    network = create_vgg_network(img_prep, img_aug, learning_rate)
 
     # Training. It will always save the best performing model on the validation data, even if it overfits.
-    checkpoint_path = 'output/'+name+'/'
-    model = tflearn.DNN(network, tensorboard_verbose=0, tensorboard_dir='tensorboard', best_checkpoint_path=checkpoint_path)
+    # checkpoint_path = 'output/'+name+'/'
+    # model = tflearn.DNN(network, tensorboard_verbose=0, tensorboard_dir='tensorboard', best_checkpoint_path=checkpoint_path)
+    model = tflearn.DNN(network, tensorboard_verbose=0, tensorboard_dir='tensorboard')
     model.fit(X, Y, n_epoch=num_epochs, shuffle=True, validation_set=(X_test, Y_test),
     show_metric=True, batch_size=batch_size, run_id=name)
 
     # Save a model
-    model.save('alexnet.tflearn')
+    model.save('vgg.tflearn')
     # Load a model
     # model.load('vgg.tflearn')
 
