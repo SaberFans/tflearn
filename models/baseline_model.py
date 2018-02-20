@@ -69,7 +69,7 @@ def create_alex_network(img_prep, img_aug, learning_rate):
     # (51-3)/2 + 1 = 20 
     network = local_response_normalization(network) # normalization1
     # 20*20*96
-    network = conv_2d(network, 256, 5, stride=1, activation='relu')
+    network = conv_2d(network, 256, 5, strides=1, activation='relu')
     # (20-5+2)/1 + 1 = 17*17*256
     network = max_pool_2d(network, 3, strides=2, padding="valid")                # pool2
     # (17-3)/2 + 1 = 8
@@ -83,11 +83,11 @@ def create_alex_network(img_prep, img_aug, learning_rate):
     # (8-3+2)/2 + 1 = 4
     network = local_response_normalization(network)
     # 4*4*256
-    network = fully_connected(network, 4096, activation='tanh')
+    network = fully_connected(network, 4096, activation='relu')
     # 4096*4*4*256 neurons ???
 
     network = dropout(network, 0.5)
-    network = fully_connected(network, 4096, activation='tanh')
+    network = fully_connected(network, 4096, activation='relu')
      # 4096*4096
     network = dropout(network, 0.5)
     network = fully_connected(network, 200, activation='softmax')
