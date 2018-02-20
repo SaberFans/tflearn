@@ -90,7 +90,7 @@ def create_alex_network(img_prep, img_aug, learning_rate):
     network = fully_connected(network, 4096, activation='tanh')
      # 4096*4096
     network = dropout(network, 0.5)
-    network = fully_connected(network, 17, activation='softmax')
+    network = fully_connected(network, 200, activation='softmax')
     network = regression(network, optimizer='momentum',
                          loss='categorical_crossentropy',
                          learning_rate=0.001)
