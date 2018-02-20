@@ -61,23 +61,34 @@ def create_alex_network(img_prep, img_aug, learning_rate):
         The network."""
 
     # Input shape will be [batch_size, height, width, channels].
-    network = input_data(shape=[None, 227, 227, 3])
-    
-    
-    network = conv_2d(network, 96, 11, strides=4, activation='relu')
-    network = max_pool_2d(network, 3, strides=2)
+    network = input_data(shape=[None, 64, 64, 3])
+    # 64*64*3
+    network = conv_2d(network, 96, 3, strides=2, padding="valid", activation='relu')
+    # (64-3)/2 +1 = 51*51*93
+    network = max_pool_2d(network, 3, strides=2, padding="valid")  # pool1
+    # (51-3)/2 + 1 = 20 
+    network = local_response_normalization(network) # normalization1
+    # 20*20*96
+    network = conv_2d(network, 256, 5, stride=1, activation='relu')
+    # (20-5+2)/1 + 1 = 17*17*256
+    network = max_pool_2d(network, 3, strides=2, padding="valid")                # pool2
+    # (17-3)/2 + 1 = 8
+
     network = local_response_normalization(network)
-    network = conv_2d(network, 256, 5, activation='relu')
-    network = max_pool_2d(network, 3, strides=2)
-    network = local_response_normalization(network)
+
     network = conv_2d(network, 384, 3, activation='relu')
     network = conv_2d(network, 384, 3, activation='relu')
     network = conv_2d(network, 256, 3, activation='relu')
-    network = max_pool_2d(network, 3, strides=2)
+    network = max_pool_2d(network, 3, strides=2, padding="same")
+    # (8-3+2)/2 + 1 = 4
     network = local_response_normalization(network)
+    # 4*4*256
     network = fully_connected(network, 4096, activation='tanh')
+    # 4096*4*4*256 neurons ???
+
     network = dropout(network, 0.5)
     network = fully_connected(network, 4096, activation='tanh')
+     # 4096*4096
     network = dropout(network, 0.5)
     network = fully_connected(network, 17, activation='softmax')
     network = regression(network, optimizer='momentum',
