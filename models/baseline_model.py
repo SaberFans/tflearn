@@ -61,9 +61,8 @@ def create_alex_network(img_prep, img_aug, learning_rate):
         The network."""
 
     # Input shape will be [batch_size, height, width, channels].
-    network = input_data(shape=[None, 64, 64, 3],
-                         data_preprocessing=img_prep,
-                         data_augmentation=img_aug)
+    network = input_data(shape=[None, 227, 227, 3])
+    
     
     network = conv_2d(network, 96, 11, strides=4, activation='relu')
     network = max_pool_2d(network, 3, strides=2)
@@ -84,5 +83,4 @@ def create_alex_network(img_prep, img_aug, learning_rate):
     network = regression(network, optimizer='momentum',
                          loss='categorical_crossentropy',
                          learning_rate=0.001)
-
     return network
