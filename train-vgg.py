@@ -2,18 +2,19 @@
 
 This script trains a simple baseline_model on the tiny-imagenet dataset."""
 
-import sys
-import os
 import argparse
 import tflearn
 import h5py
 
-sys.path.insert(0, os.path.dirname(__file__))
-
 from datasets.tiny_imagenet import *
 from models.baseline_model import *
-
 from tflearn.data_utils import shuffle
+
+import sys
+import os
+
+sys.path.insert(0, os.path.dirname(__file__))
+
 
 def get_data(data_dir, hdf5):
     """This function loads in the data, either by loading images on the fly or by creating and
@@ -40,14 +41,16 @@ def get_data(data_dir, hdf5):
         # Check if hdf5 databases already exist and create them if not.
         # if not os.path.exists('hdf5/tiny-imagenet_train.h5'):
         from tflearn.data_utils import build_hdf5_image_dataset
-        
+
         print ' Creating hdf5 train dataset.'
-        build_hdf5_image_dataset(train_file, image_shape=(224, 224), mode='file', output_path='hdf5/tiny-imagenet_train.h5', categorical_labels=True, normalize=True)
+        build_hdf5_image_dataset(train_file, image_shape=(224, 224), mode='file',
+                                 output_path='hdf5/tiny-imagenet_train.h5', categorical_labels=True, normalize=True)
 
         # if not os.path.exists('hdf5/tiny-imagenet_val.h5'):
         from tflearn.data_utils import build_hdf5_image_dataset
         print ' Creating hdf5 val dataset.'
-        build_hdf5_image_dataset(val_file, image_shape=(224, 224), mode='file', output_path='hdf5/tiny-imagenet_val.h5', categorical_labels=True, normalize=True)
+        build_hdf5_image_dataset(val_file, image_shape=(224, 224), mode='file', output_path='hdf5/tiny-imagenet_val.h5',
+                                 categorical_labels=True, normalize=True)
 
         # Load training data from hdf5 dataset.
         h5f = h5py.File('hdf5/tiny-imagenet_train.h5', 'r')
@@ -57,13 +60,15 @@ def get_data(data_dir, hdf5):
         # Load validation data.
         h5f = h5py.File('hdf5/tiny-imagenet_val.h5', 'r')
         X_test = h5f['X']
-        Y_test = h5f['Y']    
+        Y_test = h5f['Y']
 
-    # Load images directly from disk when they are required.
+        # Load images directly from disk when they are required.
     else:
         from tflearn.data_utils import image_preloader
-        X, Y = image_preloader(train_file, image_shape=(224, 224), mode='file', categorical_labels=True, normalize=True, filter_channel=True)
-        X_test, Y_test = image_preloader(val_file, image_shape=(224, 224), mode='file', categorical_labels=True, normalize=True, filter_channel=True)
+        X, Y = image_preloader(train_file, image_shape=(224, 224), mode='file', categorical_labels=True, normalize=True,
+                               filter_channel=True)
+        X_test, Y_test = image_preloader(val_file, image_shape=(224, 224), mode='file', categorical_labels=True,
+                                         normalize=True, filter_channel=True)
 
     # Randomly shuffle the dataset.
     X, Y = shuffle(X, Y)
@@ -104,12 +109,13 @@ def main(data_dir, hdf5, name):
     # model = tflearn.DNN(network, tensorboard_verbose=0, tensorboard_dir='tensorboard', best_checkpoint_path=checkpoint_path)
     model = tflearn.DNN(network, tensorboard_verbose=0, tensorboard_dir='tensorboard')
     model.fit(X, Y, n_epoch=num_epochs, shuffle=True, validation_set=(X_test, Y_test),
-    show_metric=True, batch_size=batch_size, run_id=name)
+              show_metric=True, batch_size=batch_size, run_id=name)
 
     # Save a model
     model.save('vgg.tflearn')
     # Load a model
     # model.load('vgg.tflearn')
+
 
 if __name__ == '__main__':
     # Parse arguments and create output directories.

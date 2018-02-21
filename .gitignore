@@ -1,6 +1,5 @@
 data/*
 *.pyc
 tensorboard/*
-
-
+.idea/
 output/
