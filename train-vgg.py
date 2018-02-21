@@ -77,7 +77,7 @@ def get_data(data_dir, hdf5):
                                          normalize=True, filter_channel=True)
 
     # Randomly shuffle the dataset.
-    X, Y = shuffle(X, Y)
+    # X, Y = shuffle(X, Y)
 
     return X, Y, X_test, Y_test
 
