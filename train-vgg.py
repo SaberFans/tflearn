@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 """Tutorial for the CS7GV1 Computer Vision 17/18 lecture at Trinity College Dublin.
 
 This script trains a simple baseline_model on the tiny-imagenet dataset."""
@@ -42,13 +44,13 @@ def get_data(data_dir, hdf5):
         if not os.path.exists('hdf5/tiny-imagenet_train.h5'):
             from tflearn.data_utils import build_hdf5_image_dataset
 
-            print ' Creating hdf5 train dataset.'
+            print ("Creating hdf5 train dataset.")
             build_hdf5_image_dataset(train_file, image_shape=(224, 224), mode='file',
                                      output_path='hdf5/tiny-imagenet_train.h5', categorical_labels=True, normalize=True)
 
         if not os.path.exists('hdf5/tiny-imagenet_val.h5'):
             from tflearn.data_utils import build_hdf5_image_dataset
-            print ' Creating hdf5 val dataset.'
+            print ("Creating hdf5 val dataset.")
             build_hdf5_image_dataset(val_file, image_shape=(224, 224), mode='file', output_path='hdf5/tiny-imagenet_val.h5',
                                      categorical_labels=True, normalize=True)
 
@@ -130,8 +132,11 @@ if __name__ == '__main__':
                         default='default',
                         help='Name of this training run. Will store results in output/[name]')
     args, unparsed = parser.parse_known_args()
-    if not os.path.exists('tensorboard'):
-        os.makedirs('tensorboard')
-    if not os.path.exists('output'):
-        os.makedirs('output')
-    main(args.data_dir, args.hdf5, args.name)
+
+    print(args.hdf5)
+    print(args.name)
+    # if not os.path.exists('tensorboard'):
+    #     os.makedirs('tensorboard')
+    # if not os.path.exists('output'):
+    #     os.makedirs('output')
+    # main(args.data_dir, args.hdf5, args.name)
