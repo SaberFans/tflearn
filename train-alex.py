@@ -43,13 +43,13 @@ def get_data(data_dir, hdf5):
         if not os.path.exists('hdf5/tiny-imagenet_train.h5'):
             from tflearn.data_utils import build_hdf5_image_dataset
             print ' Creating hdf5 train dataset.'
-            build_hdf5_image_dataset(train_file, image_shape=(227, 227), mode='file',
+            build_hdf5_image_dataset(train_file, image_shape=(64, 64), mode='file',
                                      output_path='hdf5/tiny-imagenet_train.h5', categorical_labels=True, normalize=True)
 
         if not os.path.exists('hdf5/tiny-imagenet_val.h5'):
             from tflearn.data_utils import build_hdf5_image_dataset
             print ' Creating hdf5 val dataset.'
-            build_hdf5_image_dataset(val_file, image_shape=(227, 227), mode='file', output_path='hdf5/tiny-imagenet_val.h5',
+            build_hdf5_image_dataset(val_file, image_shape=(64, 64), mode='file', output_path='hdf5/tiny-imagenet_val.h5',
                                      categorical_labels=True, normalize=True)
 
         # Load training data from hdf5 dataset.
@@ -61,6 +61,7 @@ def get_data(data_dir, hdf5):
         h5f = h5py.File('hdf5/tiny-imagenet_val.h5', 'r')
         X_test = h5f['X']
         Y_test = h5f['Y']
+
 
         # Load images directly from disk when they are required.
     else:

@@ -4,7 +4,7 @@ This script gives the network definition."""
 from __future__ import division, print_function, absolute_import
 
 
-from tflearn.layers.core import input_data, dropout, fully_connected
+from tflearn.layers.core import input_data, dropout, fully_connected, reshape
 from tflearn.layers.conv import conv_2d, max_pool_2d
 from tflearn.layers.estimator import regression
 from tflearn.layers.normalization import batch_normalization
@@ -61,9 +61,13 @@ def create_alex_network(img_prep, img_aug, learning_rate):
         The network."""
 
     # Input shape will be [batch_size, height, width, channels].
-    network = input_data(shape=[None, 227, 227, 3],
+    network = input_data(shape=[None, 64, 64, 3],
                          data_preprocessing=img_prep,
                          data_augmentation=img_aug)
+
+    # reshape
+    print("reshape 64*64 image to fit 227*227 alex net")
+    network = reshape(network, shape=[None, 227, 227, 3])
 
     network = conv_2d(network, 96, 11, strides=4, activation='relu')
     network = max_pool_2d(network, 3, strides=2)
