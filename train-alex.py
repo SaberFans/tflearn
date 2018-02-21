@@ -112,9 +112,9 @@ def main(data_dir, hdf5, name):
               show_metric=True, batch_size=batch_size, run_id=name)
 
     # Save a model
-    model.save('alexnet.tflearn')
+    # model.save('alexnet.tflearn')
     # Load a model
-    # model.load('vgg.tflearn')
+    # model.load('alexnet.tflearn')
 
 
 if __name__ == '__main__':

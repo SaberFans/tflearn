@@ -105,14 +105,14 @@ def main(data_dir, hdf5, name):
     network = create_vgg_network(img_prep, img_aug, learning_rate)
 
     # Training. It will always save the best performing model on the validation data, even if it overfits.
-    # checkpoint_path = 'output/'+name+'/'
-    # model = tflearn.DNN(network, tensorboard_verbose=0, tensorboard_dir='tensorboard', best_checkpoint_path=checkpoint_path)
-    model = tflearn.DNN(network, tensorboard_verbose=0, tensorboard_dir='tensorboard')
+    checkpoint_path = 'output/'+name+'/'
+    model = tflearn.DNN(network, tensorboard_verbose=0, tensorboard_dir='tensorboard', best_checkpoint_path=checkpoint_path)
+    # model = tflearn.DNN(network, tensorboard_verbose=0, tensorboard_dir='tensorboard')
     model.fit(X, Y, n_epoch=num_epochs, shuffle=True, validation_set=(X_test, Y_test),
               show_metric=True, batch_size=batch_size, run_id=name)
 
     # Save a model
-    model.save('vgg.tflearn')
+    # model.save('vgg.tflearn')
     # Load a model
     # model.load('vgg.tflearn')
 
