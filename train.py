@@ -107,8 +107,12 @@ def main(data_dir, hdf5, name):
     checkpoint_path = 'output/' + name + '/'
     model = tflearn.DNN(network, tensorboard_verbose=0, tensorboard_dir='tensorboard',
                         best_checkpoint_path=checkpoint_path)
-    model.fit(X, Y, n_epoch=num_epochs, shuffle=True, validation_set=(X_test, Y_test),
-              show_metric=True, batch_size=batch_size, run_id=name)
+    # model.fit(X, Y, n_epoch=num_epochs, shuffle=True, validation_set=(X_test, Y_test),
+    #           show_metric=True, batch_size=batch_size, run_id=name)
+
+    model.load("/Users/yang/Downloads/alexnet-owt-4df8aa71.pth")
+
+    print model.evaluate(X_test,Y_test, batch_size=batch_size)
 
 
 if __name__ == '__main__':
@@ -119,6 +123,7 @@ if __name__ == '__main__':
                         help='Directory in which the input data is stored.')
     parser.add_argument('--hdf5',
                         help='Set if hdf5 database should be created.',
+
                         action='store_true')
     parser.add_argument('--name', type=str,
                         default='default',

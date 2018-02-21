@@ -18,9 +18,9 @@ import os
 
 sys.path.insert(0, os.path.dirname(__file__))
 
-parent_output_dir = 'hdf5-vgg'
-output_path1 = 'hdf5-vgg/tiny-imagenet_train.h5'
-output_path2 = 'hdf5-vgg/tiny-imagenet_val.h5'
+parent_output_dir = 'hdf5'
+output_path1 = 'hdf5/tiny-imagenet_train.h5'
+output_path2 = 'hdf5/tiny-imagenet_val.h5'
 
 def get_data(data_dir, hdf5):
     """This function loads in the data, either by loading images on the fly or by creating and
@@ -49,13 +49,13 @@ def get_data(data_dir, hdf5):
             from tflearn.data_utils import build_hdf5_image_dataset
 
             print ("Creating hdf5 train dataset.")
-            build_hdf5_image_dataset(train_file, image_shape=(224, 224), mode='file',
+            build_hdf5_image_dataset(train_file, image_shape=(256, 256), mode='file',
                                      output_path=output_path1, categorical_labels=True, normalize=True)
 
         if not os.path.exists(output_path2):
             from tflearn.data_utils import build_hdf5_image_dataset
             print ("Creating hdf5 val dataset.")
-            build_hdf5_image_dataset(val_file, image_shape=(224, 224), mode='file',
+            build_hdf5_image_dataset(val_file, image_shape=(256, 256), mode='file',
                                      output_path=output_path2, categorical_labels=True, normalize=True)
 
         # Load training data from hdf5 dataset.
@@ -113,9 +113,7 @@ def main(data_dir, hdf5, name):
     # Training. It will always save the best performing model on the validation data, even if it overfits.
     checkpoint_path = 'output/'+name+'/'
 
-
     model = tflearn.DNN(network, tensorboard_verbose=0, tensorboard_dir='tensorboard', best_checkpoint_path=checkpoint_path)
-    # model = tflearn.DNN(network, tensorboard_verbose=0, tensorboard_dir='tensorboard')
 
     print("-------start accuracy evaluation process-----")
     model.fit(X, Y, n_epoch=num_epochs, shuffle=True, validation_set=(X_test, Y_test),
@@ -128,7 +126,9 @@ def main(data_dir, hdf5, name):
 
     print("-------start top5 accuracy evaluation process-----")
     # Get the network definition.
-    network = create_vgg_network_m(img_prep, img_aug, learning_rate)
+
+    top5 = tflearn.metrics.Top_k(k=5)
+    network = create_vgg_network(img_prep, img_aug, learning_rate, metric=top5)
 
     # Load a model, and evaluate the same model with top5 metrics
     model = tflearn.DNN(network, tensorboard_verbose=0, tensorboard_dir='tensorboard',
@@ -156,8 +156,6 @@ if __name__ == '__main__':
                         help='Name of this training run. Will store results in output/[name]')
     args, unparsed = parser.parse_known_args()
 
-    print(args.hdf5)
-    print(args.name)
     if not os.path.exists('tensorboard'):
         os.makedirs('tensorboard')
     if not os.path.exists('output'):
