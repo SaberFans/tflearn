@@ -19,6 +19,7 @@ parent_output_dir = 'hdf5'
 output_path1 = 'hdf5/tiny-imagenet_train.h5'
 output_path2 = 'hdf5/tiny-imagenet_val.h5'
 
+
 def get_data(data_dir, hdf5):
     """This function loads in the data, either by loading images on the fly or by creating and
     loading from a hdf5 database.
@@ -38,40 +39,37 @@ def get_data(data_dir, hdf5):
 
     # Check if (creating and) loading from hdf5 database is desired.
     if hdf5:
-        print 'hdf5 is slow'
         # Create folder to store dataset.
-        if not os.path.exists(parent_output_dir):
-            os.makedirs(parent_output_dir)
+        if not os.path.exists('hdf5'):
+            os.makedirs('hdf5')
         # Check if hdf5 databases already exist and create them if not.
-        if not os.path.exists(output_path1):
+        if not os.path.exists('hdf5/tiny-imagenet_train.h5'):
             from tflearn.data_utils import build_hdf5_image_dataset
             print ' Creating hdf5 train dataset.'
-            build_hdf5_image_dataset(train_file, image_shape=(256, 256), mode='file',
+            build_hdf5_image_dataset(train_file, image_shape=(64, 64), mode='file',
                                      output_path='hdf5/tiny-imagenet_train.h5', categorical_labels=True, normalize=True)
 
-        if not os.path.exists(output_path2):
+        if not os.path.exists('hdf5/tiny-imagenet_val.h5'):
             from tflearn.data_utils import build_hdf5_image_dataset
             print ' Creating hdf5 val dataset.'
-            build_hdf5_image_dataset(val_file, image_shape=(256, 256), mode='file', output_path='hdf5/tiny-imagenet_val.h5',
-                                     categorical_labels=True, normalize=True)
+            build_hdf5_image_dataset(val_file, image_shape=(64, 64), mode='file',
+                                     output_path='hdf5/tiny-imagenet_val.h5', categorical_labels=True, normalize=True)
 
         # Load training data from hdf5 dataset.
-        h5f = h5py.File(output_path1, 'r')
+        h5f = h5py.File('hdf5/tiny-imagenet_train.h5', 'r')
         X = h5f['X']
         Y = h5f['Y']
 
         # Load validation data.
-        h5f = h5py.File(output_path2, 'r')
+        h5f = h5py.File('hdf5/tiny-imagenet_val.h5', 'r')
         X_test = h5f['X']
         Y_test = h5f['Y']
-
 
         # Load images directly from disk when they are required.
     else:
         from tflearn.data_utils import image_preloader
         X, Y = image_preloader(train_file, image_shape=(64, 64), mode='file', categorical_labels=True, normalize=True,
                                filter_channel=True)
-
         X_test, Y_test = image_preloader(val_file, image_shape=(64, 64), mode='file', categorical_labels=True,
                                          normalize=True, filter_channel=True)
 
@@ -91,7 +89,7 @@ def main(data_dir, hdf5, name):
 
     # Set some variables for training.
     batch_size = 256
-    num_epochs = 50
+    num_epochs = 10
     learning_rate = 0.001
 
     # Load in data.
@@ -101,15 +99,13 @@ def main(data_dir, hdf5, name):
     img_prep = tflearn.data_preprocessing.ImagePreprocessing()
     img_prep.add_featurewise_zero_center()
     img_prep.add_featurewise_stdnorm()
-    # resize the image to fit the test
-    img_prep.resize(227,227)
 
     # Define some data augmentation options. These will only be done for training.
     img_aug = tflearn.data_augmentation.ImageAugmentation()
     img_aug.add_random_flip_leftright()
 
     # Get the network definition.
-    network = create_alex_network(img_prep, img_aug, learning_rate)
+    network = create_network(img_prep, img_aug, learning_rate)
 
     # Training. It will always save the best performing model on the validation data, even if it overfits.
     checkpoint_path = 'output/' + name + '/'
@@ -117,11 +113,6 @@ def main(data_dir, hdf5, name):
                         best_checkpoint_path=checkpoint_path)
     model.fit(X, Y, n_epoch=num_epochs, shuffle=True, validation_set=(X_test, Y_test),
               show_metric=True, batch_size=batch_size, run_id=name)
-
-    # Save a model
-    # model.save('alexnet.tflearn')
-    # Load a model
-    # model.load('alexnet.tflearn')
 
 
 if __name__ == '__main__':

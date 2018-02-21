@@ -42,13 +42,13 @@ def get_data(data_dir, hdf5):
         if not os.path.exists('hdf5/tiny-imagenet_train.h5'):
             from tflearn.data_utils import build_hdf5_image_dataset
             print ' Creating hdf5 train dataset.'
-            build_hdf5_image_dataset(train_file, image_shape=(64, 64), mode='file',
+            build_hdf5_image_dataset(train_file, image_shape=(256, 256), mode='file',
                                      output_path='hdf5/tiny-imagenet_train.h5', categorical_labels=True, normalize=True)
 
         if not os.path.exists('hdf5/tiny-imagenet_val.h5'):
             from tflearn.data_utils import build_hdf5_image_dataset
             print ' Creating hdf5 val dataset.'
-            build_hdf5_image_dataset(val_file, image_shape=(64, 64), mode='file',
+            build_hdf5_image_dataset(val_file, image_shape=(256, 256), mode='file',
                                      output_path='hdf5/tiny-imagenet_val.h5', categorical_labels=True, normalize=True)
 
         # Load training data from hdf5 dataset.
@@ -70,7 +70,7 @@ def get_data(data_dir, hdf5):
                                          normalize=True, filter_channel=True)
 
     # Randomly shuffle the dataset.
-    X, Y = shuffle(X, Y)
+    # X, Y = shuffle(X, Y)
 
     return X, Y, X_test, Y_test
 
@@ -110,7 +110,7 @@ def main(data_dir, hdf5, name):
     # model.fit(X, Y, n_epoch=num_epochs, shuffle=True, validation_set=(X_test, Y_test),
     #           show_metric=True, batch_size=batch_size, run_id=name)
 
-    model.load("/Users/yang/Downloads/alexnet-owt-4df8aa71.pth")
+    model.load("/home/yang/tflearn/pretrained/vgg11.pth")
 
     print model.evaluate(X_test,Y_test, batch_size=batch_size)
 

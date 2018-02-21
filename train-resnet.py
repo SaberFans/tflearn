@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 """Tutorial for the CS7GV1 Computer Vision 17/18 lecture at Trinity College Dublin.
 
 This script trains a simple baseline_model on the tiny-imagenet dataset."""
@@ -9,6 +11,7 @@ import h5py
 from datasets.tiny_imagenet import *
 from models.baseline_model import *
 from tflearn.data_utils import shuffle
+from tflearn.metrics import Top_k
 
 import sys
 import os
@@ -38,22 +41,22 @@ def get_data(data_dir, hdf5):
 
     # Check if (creating and) loading from hdf5 database is desired.
     if hdf5:
-        print 'hdf5 is slow'
         # Create folder to store dataset.
         if not os.path.exists(parent_output_dir):
             os.makedirs(parent_output_dir)
         # Check if hdf5 databases already exist and create them if not.
         if not os.path.exists(output_path1):
             from tflearn.data_utils import build_hdf5_image_dataset
-            print ' Creating hdf5 train dataset.'
+
+            print ("Creating hdf5 train dataset.")
             build_hdf5_image_dataset(train_file, image_shape=(256, 256), mode='file',
-                                     output_path='hdf5/tiny-imagenet_train.h5', categorical_labels=True, normalize=True)
+                                     output_path=output_path1, categorical_labels=True, normalize=True)
 
         if not os.path.exists(output_path2):
             from tflearn.data_utils import build_hdf5_image_dataset
-            print ' Creating hdf5 val dataset.'
-            build_hdf5_image_dataset(val_file, image_shape=(256, 256), mode='file', output_path='hdf5/tiny-imagenet_val.h5',
-                                     categorical_labels=True, normalize=True)
+            print ("Creating hdf5 val dataset.")
+            build_hdf5_image_dataset(val_file, image_shape=(256, 256), mode='file',
+                                     output_path=output_path2, categorical_labels=True, normalize=True)
 
         # Load training data from hdf5 dataset.
         h5f = h5py.File(output_path1, 'r')
@@ -65,18 +68,16 @@ def get_data(data_dir, hdf5):
         X_test = h5f['X']
         Y_test = h5f['Y']
 
-
         # Load images directly from disk when they are required.
     else:
         from tflearn.data_utils import image_preloader
         X, Y = image_preloader(train_file, image_shape=(64, 64), mode='file', categorical_labels=True, normalize=True,
                                filter_channel=True)
-
         X_test, Y_test = image_preloader(val_file, image_shape=(64, 64), mode='file', categorical_labels=True,
                                          normalize=True, filter_channel=True)
 
     # Randomly shuffle the dataset.
-    X, Y = shuffle(X, Y)
+    # X, Y = shuffle(X, Y)
 
     return X, Y, X_test, Y_test
 
@@ -90,8 +91,8 @@ def main(data_dir, hdf5, name):
         name: Name of the current training run."""
 
     # Set some variables for training.
-    batch_size = 256
-    num_epochs = 50
+    batch_size = 32
+    num_epochs = 1
     learning_rate = 0.001
 
     # Load in data.
@@ -101,27 +102,44 @@ def main(data_dir, hdf5, name):
     img_prep = tflearn.data_preprocessing.ImagePreprocessing()
     img_prep.add_featurewise_zero_center()
     img_prep.add_featurewise_stdnorm()
-    # resize the image to fit the test
-    img_prep.resize(227,227)
 
     # Define some data augmentation options. These will only be done for training.
     img_aug = tflearn.data_augmentation.ImageAugmentation()
     img_aug.add_random_flip_leftright()
 
     # Get the network definition.
-    network = create_alex_network(img_prep, img_aug, learning_rate)
+    network = create_vgg_network(img_prep, img_aug, learning_rate)
 
     # Training. It will always save the best performing model on the validation data, even if it overfits.
-    checkpoint_path = 'output/' + name + '/'
-    model = tflearn.DNN(network, tensorboard_verbose=0, tensorboard_dir='tensorboard',
-                        best_checkpoint_path=checkpoint_path)
+    checkpoint_path = 'output/'+name+'/'
+
+
+    model = tflearn.DNN(network, tensorboard_verbose=0, tensorboard_dir='tensorboard', best_checkpoint_path=checkpoint_path)
+    # model = tflearn.DNN(network, tensorboard_verbose=0, tensorboard_dir='tensorboard')
+
+    print("-------start accuracy evaluation process-----")
     model.fit(X, Y, n_epoch=num_epochs, shuffle=True, validation_set=(X_test, Y_test),
               show_metric=True, batch_size=batch_size, run_id=name)
+    print("-------end accuracy evaluation process--------")
 
     # Save a model
-    # model.save('alexnet.tflearn')
-    # Load a model
-    # model.load('alexnet.tflearn')
+    model.save('vgg.tflearn')
+
+
+    print("-------start top5 accuracy evaluation process-----")
+    # Get the network definition.
+    network = create_vgg_network_m(img_prep, img_aug, learning_rate)
+
+    # Load a model, and evaluate the same model with top5 metrics
+    model = tflearn.DNN(network, tensorboard_verbose=0, tensorboard_dir='tensorboard',
+                        best_checkpoint_path=checkpoint_path)
+    model.load('vgg.tflearn', weights_only=True)
+
+    model.evaluate( X_test, Y_test, batch_size=batch_size)
+
+
+    print("-------end top 5 accuracy evaluation process--------")
+
 
 
 if __name__ == '__main__':
@@ -137,6 +155,9 @@ if __name__ == '__main__':
                         default='default',
                         help='Name of this training run. Will store results in output/[name]')
     args, unparsed = parser.parse_known_args()
+
+    print(args.hdf5)
+    print(args.name)
     if not os.path.exists('tensorboard'):
         os.makedirs('tensorboard')
     if not os.path.exists('output'):
