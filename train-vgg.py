@@ -135,8 +135,8 @@ if __name__ == '__main__':
 
     print(args.hdf5)
     print(args.name)
-    # if not os.path.exists('tensorboard'):
-    #     os.makedirs('tensorboard')
-    # if not os.path.exists('output'):
-    #     os.makedirs('output')
-    # main(args.data_dir, args.hdf5, args.name)
+    if not os.path.exists('tensorboard'):
+        os.makedirs('tensorboard')
+    if not os.path.exists('output'):
+        os.makedirs('output')
+    main(args.data_dir, args.hdf5, args.name)
