@@ -68,11 +68,9 @@ def get_data(data_dir, hdf5):
         from tflearn.data_utils import image_preloader
         X, Y = image_preloader(train_file, image_shape=(64, 64), mode='file', categorical_labels=True, normalize=True,
                                filter_channel=True)
-        X = np.reshape(X, (-1, 227, 227, 3))
 
         X_test, Y_test = image_preloader(val_file, image_shape=(64, 64), mode='file', categorical_labels=True,
                                          normalize=True, filter_channel=True)
-        X_test = np.reshape(X_test, (-1, 227, 227, 3))
 
     # Randomly shuffle the dataset.
     X, Y = shuffle(X, Y)
@@ -100,6 +98,8 @@ def main(data_dir, hdf5, name):
     img_prep = tflearn.data_preprocessing.ImagePreprocessing()
     img_prep.add_featurewise_zero_center()
     img_prep.add_featurewise_stdnorm()
+    # resize the image to fit the test
+    img_prep.resize(227,227)
 
     # Define some data augmentation options. These will only be done for training.
     img_aug = tflearn.data_augmentation.ImageAugmentation()

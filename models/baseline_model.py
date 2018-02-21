@@ -61,7 +61,7 @@ def create_alex_network(img_prep, img_aug, learning_rate):
         The network."""
 
     # Input shape will be [batch_size, height, width, channels].
-    network = input_data(shape=[None, 64, 64, 3],
+    network = input_data(shape=[None, 227, 227, 3],
                          data_preprocessing=img_prep,
                          data_augmentation=img_aug)
 
