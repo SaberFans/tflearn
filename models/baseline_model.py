@@ -67,7 +67,6 @@ def create_alex_network(img_prep, img_aug, learning_rate):
 
     # reshape
     print("reshape 64*64 image to fit 227*227 alex net")
-    network = reshape(network, new_shape=[None, 227, 227, 3])
 
     network = conv_2d(network, 96, 11, strides=4, activation='relu')
     network = max_pool_2d(network, 3, strides=2)

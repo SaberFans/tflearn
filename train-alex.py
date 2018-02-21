@@ -68,8 +68,11 @@ def get_data(data_dir, hdf5):
         from tflearn.data_utils import image_preloader
         X, Y = image_preloader(train_file, image_shape=(64, 64), mode='file', categorical_labels=True, normalize=True,
                                filter_channel=True)
+        X = np.reshape(X, (-1, 227, 227, 3))
+
         X_test, Y_test = image_preloader(val_file, image_shape=(64, 64), mode='file', categorical_labels=True,
                                          normalize=True, filter_channel=True)
+        X_test = np.reshape(X_test, (-1, 227, 227, 3))
 
     # Randomly shuffle the dataset.
     X, Y = shuffle(X, Y)
