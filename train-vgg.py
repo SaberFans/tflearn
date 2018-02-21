@@ -92,7 +92,7 @@ def main(data_dir, hdf5, name):
 
     # Set some variables for training.
     batch_size = 32
-    num_epochs = 50
+    num_epochs = 1
     learning_rate = 0.001
 
     # Load in data.
@@ -112,18 +112,34 @@ def main(data_dir, hdf5, name):
 
     # Training. It will always save the best performing model on the validation data, even if it overfits.
     checkpoint_path = 'output/'+name+'/'
+
+
     model = tflearn.DNN(network, tensorboard_verbose=0, tensorboard_dir='tensorboard', best_checkpoint_path=checkpoint_path)
     # model = tflearn.DNN(network, tensorboard_verbose=0, tensorboard_dir='tensorboard')
 
-    top5 = Top_k(k=5)
-
+    print("-------start accuracy evaluation process-----")
     model.fit(X, Y, n_epoch=num_epochs, shuffle=True, validation_set=(X_test, Y_test),
-              show_metric=True, batch_size=batch_size, run_id=name, metric=top5)
+              show_metric=True, batch_size=batch_size, run_id=name)
+    print("-------end accuracy evaluation process--------")
 
     # Save a model
-    # model.save('vgg.tflearn')
-    # Load a model
-    # model.load('vgg.tflearn')
+    model.save('vgg.tflearn')
+
+
+    print("-------start top5 accuracy evaluation process-----")
+    # Get the network definition.
+    network = create_vgg_network_m(img_prep, img_aug, learning_rate)
+
+    # Load a model, and evaluate the same model with top5 metrics
+    model = tflearn.DNN(network, tensorboard_verbose=0, tensorboard_dir='tensorboard',
+                        best_checkpoint_path=checkpoint_path)
+    model.load('vgg.tflearn', weights_only=True)
+
+    model.evaluate( X_test, Y_test, batch_size=batch_size)
+
+
+    print("-------end top 5 accuracy evaluation process--------")
+
 
 
 if __name__ == '__main__':

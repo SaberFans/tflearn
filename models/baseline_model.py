@@ -136,3 +136,52 @@ def create_vgg_network(img_prep, img_aug, learning_rate):
                          loss='categorical_crossentropy',
                          learning_rate=learning_rate)
     return network
+def create_vgg_network_m(img_prep, img_aug, learning_rate, metric):
+    """This function defines the network structure.
+
+    Args:
+        img_prep: Preprocessing function that will be done to each input image.
+        img_aug: Data augmentation function that will be done to each training input image.
+
+    Returns:
+        The network."""
+
+    # Input shape will be [batch_size, height, width, channels].
+    # Building "VGG Network"
+    network = input_data(shape=[None, 224, 224, 3],
+                         data_preprocessing=img_prep,
+                         data_augmentation=img_aug)
+
+    network = conv_2d(network, 64, 3, activation='relu')
+    network = conv_2d(network, 64, 3, activation='relu')
+    network = max_pool_2d(network, 2, strides=2)
+
+    network = conv_2d(network, 128, 3, activation='relu')
+    network = conv_2d(network, 128, 3, activation='relu')
+    network = max_pool_2d(network, 2, strides=2)
+
+    network = conv_2d(network, 256, 3, activation='relu')
+    network = conv_2d(network, 256, 3, activation='relu')
+    network = conv_2d(network, 256, 3, activation='relu')
+    network = max_pool_2d(network, 2, strides=2)
+
+    network = conv_2d(network, 512, 3, activation='relu')
+    network = conv_2d(network, 512, 3, activation='relu')
+    network = conv_2d(network, 512, 3, activation='relu')
+    network = max_pool_2d(network, 2, strides=2)
+
+    network = conv_2d(network, 512, 3, activation='relu')
+    network = conv_2d(network, 512, 3, activation='relu')
+    network = conv_2d(network, 512, 3, activation='relu')
+    network = max_pool_2d(network, 2, strides=2)
+
+    network = fully_connected(network, 4096, activation='relu')
+    network = dropout(network, 0.5)
+    network = fully_connected(network, 4096, activation='relu')
+    network = dropout(network, 0.5)
+    network = fully_connected(network, 200, activation='softmax')
+
+    network = regression(network, optimizer='rmsprop',
+                         loss='categorical_crossentropy',
+                         learning_rate=learning_rate, metric= metric)
+    return network
