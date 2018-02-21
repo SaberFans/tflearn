@@ -18,8 +18,8 @@ import os
 
 sys.path.insert(0, os.path.dirname(__file__))
 
-output_path1 = 'vgg/hdf5/tiny-imagenet_train.h5'
-output_path2 = 'vgg/hdf5/tiny-imagenet_val.h5'
+output_path1 = 'hdf5-vgg/tiny-imagenet_train.h5'
+output_path2 = 'hdf5-vgg/tiny-imagenet_val.h5'
 
 def get_data(data_dir, hdf5):
     """This function loads in the data, either by loading images on the fly or by creating and
