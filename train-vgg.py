@@ -11,12 +11,15 @@ import h5py
 from datasets.tiny_imagenet import *
 from models.baseline_model import *
 from tflearn.data_utils import shuffle
+from tflearn.metrics import Top_k
 
 import sys
 import os
 
 sys.path.insert(0, os.path.dirname(__file__))
 
+output_path1 = 'vgg/hdf5/tiny-imagenet_train.h5'
+output_path2 = 'vgg/hdf5/tiny-imagenet_val.h5'
 
 def get_data(data_dir, hdf5):
     """This function loads in the data, either by loading images on the fly or by creating and
@@ -41,26 +44,26 @@ def get_data(data_dir, hdf5):
         if not os.path.exists('hdf5'):
             os.makedirs('hdf5')
         # Check if hdf5 databases already exist and create them if not.
-        if not os.path.exists('hdf5/tiny-imagenet_train.h5'):
+        if not os.path.exists(output_path1):
             from tflearn.data_utils import build_hdf5_image_dataset
 
             print ("Creating hdf5 train dataset.")
-            build_hdf5_image_dataset(train_file, image_shape=(64, 64), mode='file',
-                                     output_path='hdf5/tiny-imagenet_train.h5', categorical_labels=True, normalize=True)
+            build_hdf5_image_dataset(train_file, image_shape=(224, 224), mode='file',
+                                     output_path=output_path1, categorical_labels=True, normalize=True)
 
-        if not os.path.exists('hdf5/tiny-imagenet_val.h5'):
+        if not os.path.exists(output_path2):
             from tflearn.data_utils import build_hdf5_image_dataset
             print ("Creating hdf5 val dataset.")
-            build_hdf5_image_dataset(val_file, image_shape=(64, 64), mode='file', output_path='hdf5/tiny-imagenet_val.h5',
-                                     categorical_labels=True, normalize=True)
+            build_hdf5_image_dataset(val_file, image_shape=(224, 224), mode='file',
+                                     output_path=output_path2, categorical_labels=True, normalize=True)
 
         # Load training data from hdf5 dataset.
-        h5f = h5py.File('hdf5/tiny-imagenet_train.h5', 'r')
+        h5f = h5py.File(output_path1, 'r')
         X = h5f['X']
         Y = h5f['Y']
 
         # Load validation data.
-        h5f = h5py.File('hdf5/tiny-imagenet_val.h5', 'r')
+        h5f = h5py.File(output_path2, 'r')
         X_test = h5f['X']
         Y_test = h5f['Y']
 
@@ -110,8 +113,11 @@ def main(data_dir, hdf5, name):
     checkpoint_path = 'output/'+name+'/'
     model = tflearn.DNN(network, tensorboard_verbose=0, tensorboard_dir='tensorboard', best_checkpoint_path=checkpoint_path)
     # model = tflearn.DNN(network, tensorboard_verbose=0, tensorboard_dir='tensorboard')
+
+    top5 = Top_k(k=5)
+
     model.fit(X, Y, n_epoch=num_epochs, shuffle=True, validation_set=(X_test, Y_test),
-              show_metric=True, batch_size=batch_size, run_id=name)
+              show_metric=True, batch_size=batch_size, run_id=name, metric=top5)
 
     # Save a model
     # model.save('vgg.tflearn')
